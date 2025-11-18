@@ -30,7 +30,7 @@ while true; do
     [ ! -f "$LOGFILE" ] && echo "timestamp, temperature" > "$LOGFILE"
 
     # Query modem temperature
-    temp_response=$(echo -e "AT!PCTEMP?\r" | picocom -q -b 115200 "$DEVICE" --exit-after 1000 --nolock 2>/dev/null)
+    temp_response=$(echo -e "AT!PCTEMP?\r" | picocom -q -b 115200 "$DEVICE" --exit-after 500 --nolock 2>/dev/null)
     temperature=$(echo "$temp_response" | sed -n 's/.*Temperature: *\([0-9.]*\) *C.*/\1/p')
 
     if [ -n "$temperature" ]; then
