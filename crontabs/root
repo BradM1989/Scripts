@@ -1,0 +1,4 @@
+0 */2 * * * /etc/init.d/rrdbackup backup >> /root/logs/rrdbackup.log 2>&1
+0 */4 * * * /root/systemlog/backup_systemlog.sh >> /root/logs/systemlog.log 2>&1
+0 0 * * * /root/local-repo-sync.sh >> /root/logs/repo-sync.log 2>&1
+0 * * * * /root/gstatus.sh >> /root/logs/gstatus.log 2>&1
