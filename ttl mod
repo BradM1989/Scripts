@@ -1,0 +1,5 @@
+mkdir -p /usr/share/nftables.d/chain-pre/mangle_postrouting/
+cat <<'EOT' > /usr/share/nftables.d/chain-pre/mangle_postrouting/01-set-ttl.nft
+iifname "wwan0" ip ttl set 66
+iifname "wwan0" ip6 hoplimit set 66
+EOT
