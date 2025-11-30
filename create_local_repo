@@ -1,0 +1,43 @@
+# Install packages
+opkg update
+opkg install rsync
+ 
+# Save the script
+cat << "EOF" > local-repo-sync.sh
+#!/bin/sh
+. /etc/os-release
+REPO_LOCAL="file://${1:-/${ID}}/"
+REPO_URL="rsync://rsync.${HOME_URL#*//}"
+case "${VERSION_ID}" in
+(snapshot) REPO_DIR="downloads/snapshots" ;;
+(*) REPO_DIR="downloads/releases/${VERSION_ID}" ;;
+esac
+REPO_CORE="${REPO_DIR}/targets/${OPENWRT_BOARD}"
+REPO_PKGS="${REPO_DIR}/packages/${OPENWRT_ARCH}"
+for REPO_DIR in "${REPO_CORE}" "${REPO_PKGS}"
+do mkdir -p "${REPO_LOCAL#*//}${REPO_DIR#*/}"
+rsync --bwlimit="20M" --del -r -t -v \
+"${REPO_URL}${REPO_DIR}/" \
+"${REPO_LOCAL#*//}${REPO_DIR#*/}/"
+done
+opkg update
+EOF
+chmod +x local-repo-sync.sh
+
+#scheduled update daily     
+mkdir -p /etc/crontabs/
+echo "0 0 * * * /root/local-repo-sync.sh >> /root/repo-log.log 2>&1" >> /etc/crontabs/root
+/etc/init.d/cron restart
+    
+
+
+#openwrt-local-repo
+ 
+# Configure Opkg to use local repo
+. /etc/os-release
+REPO_LOCAL="file:///${ID}/"
+REPO_URL="https://downloads.${HOME_URL#*//}"
+sed -i -e "s|${REPO_URL}|${REPO_LOCAL}|" /etc/opkg/distfeeds.conf
+
+# Run the script
+/root/local-repo-sync.sh /openwrt
