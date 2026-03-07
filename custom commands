@@ -1,0 +1,29 @@
+#!/bin/sh
+
+DEVICE="/dev/ttyUSB0"
+LOGFILE="/root/at-command-responses.log"
+
+log() {
+    printf "%s %s\n" "$(date '+%Y-%m-%d %H:%M')" "$*" >> "$LOGFILE"
+}
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 \"AT COMMAND\""
+    exit 1
+fi
+
+# Function to send a single AT command and wait for response
+send_at() {
+    local CMD="$1"
+
+    log "Sending: $CMD"
+    RESPONSE="$(echo -e "$CMD\r" | socat - "FILE:$DEVICE,raw,echo=0,crnl")"
+    log "Response: $RESPONSE"
+
+    echo "$RESPONSE"   # Still output to stdout
+}
+
+# Send the commands in order
+send_at "ATE1"
+send_at 'AT!ENTERCND="A710"'
+send_at "$1"
